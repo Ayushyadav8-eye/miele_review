@@ -1,0 +1,300 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Reviewly | Customer Feedback</title>
+    <meta name="description" content="Share your experience and help us improve.">
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <a href="{% url 'review_page' %}" class="brand">
+            <img src="{% static 'images/Miele-Logo.jpg' %}"
+                 alt="Reviewly logo">
+        </a>
+
+        <nav class="nav-links">
+            <a href="{% url 'review_page' %}" class="active">Home</a>
+            <a href="#rating-statistics">Ratings</a>
+            <a href="#feedback-form" class="profile-link"
+               aria-label="Go to feedback form">♙</a>
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- HERO SECTION -->
+        <section class="hero">
+            <div class="hero-content">
+                <p class="eyebrow">SHARE YOUR EXPERIENCE</p>
+
+                <h1>Real people. Genuine feedback.</h1>
+
+                <p class="hero-description">
+                    Your experience matters. Share your thoughts and help
+                    us create even better experiences, together.
+                </p>
+
+                <div class="hero-line"></div>
+            </div>
+        </section>
+
+        <!-- FEEDBACK FORM AND STATISTICS -->
+        <section class="dashboard">
+
+            <!-- FEEDBACK FORM -->
+            <div class="feedback-card" id="feedback-form">
+
+                <p class="eyebrow burgundy-text">
+                    SHARE YOUR EXPERIENCE
+                </p>
+
+                <h2>Write a review</h2>
+
+                <p class="card-description">
+                    Tell us what you think. Your feedback helps us improve
+                    and serve you better.
+                </p>
+
+                <!-- SUCCESS AND ERROR MESSAGES -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="notice {{ message.tags }}" role="status">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" action="{% url 'review_page' %}">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="notice error">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <!-- CUSTOMER NAME -->
+                    <div class="form-group">
+                        <label for="id_name">
+                            Your name <span>*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            name="name"
+                            id="id_name"
+                            class="form-control"
+                            placeholder="Enter your full name"
+                            maxlength="100"
+                            autocomplete="name"
+                            value="{{ form.name.value|default_if_none:'' }}"
+                            required
+                        >
+
+                        {% for error in form.name.errors %}
+                            <p class="field-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- MOBILE NUMBER -->
+                    <div class="form-group">
+                        <label for="id_mobile_number">
+                            Your mobile number <span>*</span>
+                        </label>
+
+                        <input
+                            type="tel"
+                            name="mobile_number"
+                            id="id_mobile_number"
+                            class="form-control"
+                            placeholder="Enter your mobile number"
+                            maxlength="15"
+                            autocomplete="tel"
+                            value="{{ form.mobile_number.value|default_if_none:'' }}"
+                            required
+                        >
+
+                        {% for error in form.mobile_number.errors %}
+                            <p class="field-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- RATING DROPDOWN -->
+                    <div class="form-group">
+                        <label for="id_rating">
+                            Your rating <span>*</span>
+                        </label>
+
+                        <select
+                            name="rating"
+                            id="id_rating"
+                            class="form-control"
+                            required
+                        >
+                            <option value="">Select your rating</option>
+
+                            <option value="1"
+                                {% if form.rating.value|stringformat:"s" == "1" %}selected{% endif %}>
+                                1 Star
+                            </option>
+
+                            <option value="2"
+                                {% if form.rating.value|stringformat:"s" == "2" %}selected{% endif %}>
+                                2 Stars
+                            </option>
+
+                            <option value="3"
+                                {% if form.rating.value|stringformat:"s" == "3" %}selected{% endif %}>
+                                3 Stars
+                            </option>
+
+                            <option value="4"
+                                {% if form.rating.value|stringformat:"s" == "4" %}selected{% endif %}>
+                                4 Stars
+                            </option>
+
+                            <option value="5"
+                                {% if form.rating.value|stringformat:"s" == "5" %}selected{% endif %}>
+                                5 Stars
+                            </option>
+                        </select>
+
+                        {% for error in form.rating.errors %}
+                            <p class="field-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- FEEDBACK TEXTBOX -->
+                    <div class="form-group">
+                        <label for="id_comment">
+                            Your feedback <span>*</span>
+                        </label>
+
+                        <textarea
+                            name="comment"
+                            id="id_comment"
+                            class="form-control"
+                            placeholder="Tell us about your experience..."
+                            rows="4"
+                            maxlength="2000"
+                            required
+                        >{{ form.comment.value|default_if_none:'' }}</textarea>
+
+                        {% for error in form.comment.errors %}
+                            <p class="field-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- SUBMIT BUTTON -->
+                    <button type="submit" class="submit-button">
+                        Submit Feedback
+                        <span aria-hidden="true">→</span>
+                    </button>
+
+                </form>
+            </div>
+
+            <!-- AGGREGATE STATISTICS ONLY -->
+            <section class="statistics-card"
+                     id="rating-statistics"
+                     aria-label="Overall customer rating statistics">
+
+                <div class="overall-rating">
+                    <p class="eyebrow burgundy-text">
+                        OVERALL RATING
+                    </p>
+
+                    <div class="average-rating">
+                        {% if total_reviews %}
+                            {{ average_rating|floatformat:1 }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+
+                    <div class="average-stars" aria-label="Average rating">
+                        {% for star in "12345" %}
+                            {% if total_reviews and forloop.counter <= average_rating %}
+                                <span class="star filled">★</span>
+                            {% else %}
+                                <span class="star empty">★</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <p class="stats-caption">
+                        Based on {{ total_reviews }} feedback entr{{ total_reviews|pluralize:"y,ies" }}
+                    </p>
+                </div>
+
+                <div class="rating-breakdown">
+                    <p class="eyebrow burgundy-text">
+                        RATING BREAKDOWN
+                    </p>
+
+                    {% for item in rating_breakdown %}
+                        <div class="rating-row">
+
+                            <span class="rating-label">
+                                {{ item.rating }}
+                                <span class="small-star">★</span>
+                            </span>
+
+                            <div
+                                class="rating-track"
+                                role="img"
+                                aria-label="{{ item.rating }} star rating: {{ item.percentage }} percent"
+                            >
+                                <div
+                                    class="rating-fill"
+                                    style="width: {{ item.percentage }}%;"
+                                ></div>
+                            </div>
+
+                            <span class="rating-count">
+                                {{ item.count }}
+                            </span>
+
+                            <span class="rating-percent">
+                                {{ item.percentage }}%
+                            </span>
+
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+
+        <a href="{% url 'review_page' %}" class="footer-brand">
+            <img src="{% static 'images/Miele-Logo.jpg' %}"
+                 alt="Reviewly logo">
+        </a>
+
+        <div class="footer-divider"></div>
+
+        <p>Real people. Genuine feedback.</p>
+
+        <span class="copyright">
+            © 2026 Reviewly. All rights reserved.
+        </span>
+
+    </footer>
+
+</body>
+</html>
