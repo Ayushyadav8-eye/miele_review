@@ -45,6 +45,8 @@ ALLOWED_HOSTS = [
         "localhost,127.0.0.1"
     ).split(",")
     if host.strip()
+
+    
 ]
 
 
@@ -193,3 +195,24 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = False
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django.security.DisallowedHost": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
+}
